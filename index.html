@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VentureFlow - Beginner Business Planner & Investor Portfolio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0a0e17',
+                        cardbg: '#111827',
+                        bordercol: '#1f293d',
+                        accent: '#6366f1',
+                        accenthover: '#4f46e5',
+                        success: '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0e17; }
+        ::-webkit-scrollbar-thumb { background: #1f293d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+    </style>
+</head>
+<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <header class="border-b border-bordercol bg-cardbg/80 backdrop-blur-md sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-emerald-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-seedling text-white text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-indigo-400 bg-clip-text text-transparent">VentureFlow</span>
+                    <span class="text-xs block text-emerald-400 font-medium"><i class="fa-solid fa-sparkles"></i> Beginner Edition (No Experience Needed)</span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button onclick="app.loadExample()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-book-open text-indigo-400"></i> See Example
+                </button>
+                <button onclick="app.openAiModal()" class="px-3 py-1.5 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 text-xs font-semibold rounded-lg border border-indigo-500/30 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> AI Idea Helper
+                </button>
+                <button onclick="app.resetData()" class="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-semibold rounded-lg border border-rose-500/20 transition hidden sm:flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Column: Conversational Steps (7 cols) -->
+        <div class="lg:col-span-7 flex flex-col space-y-6 no-print">
+            
+            <!-- Progress Tracker -->
+            <div class="bg-cardbg border border-bordercol rounded-2xl p-5 shadow-xl">
+                <div class="flex justify-between items-center mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-slate-300">Your Business Journey</span>
+                        <span class="text-[10px] bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded border border-indigo-500/20">Step-by-Step</span>
+                    </div>
+                    <span id="progressText" class="text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">0% Done</span>
+                </div>
+                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                    <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full w-0 transition-all duration-500"></div>
+                </div>
+                
+                <!-- Simple 4 Step Navigation -->
+                <div class="grid grid-cols-4 gap-2 mt-5">
+                    <button onclick="app.setStep(1)" id="tabBtn1" class="step-btn flex flex-col items-center p-2.5 rounded-xl border border-indigo-500 bg-indigo-500/10 text-indigo-400 text-xs font-semibold transition">
+                        <i class="fa-solid fa-lightbulb text-base mb-1"></i>
+                        <span>1. The Idea</span>
+                    </button>
+                    <button onclick="app.setStep(2)" id="tabBtn2" class="step-btn flex flex-col items-center p-2.5 rounded-xl border border-bordercol bg-slate-900/50 text-slate-400 text-xs font-semibold hover:border-slate-700 transition">
+                        <i class="fa-solid fa-users text-base mb-1"></i>
+                        <span>2. Customers</span>
+                    </button>
+                    <button onclick="app.setStep(3)" id="tabBtn3" class="step-btn flex flex-col items-center p-2.5 rounded-xl border border-bordercol bg-slate-900/50 text-slate-400 text-xs font-semibold hover:border-slate-700 transition">
+                        <i class="fa-solid fa-piggy-bank text-base mb-1"></i>
+                        <span>3. Money</span>
+                    </button>
+                    <button onclick="app.setStep(4)" id="tabBtn4" class="step-btn flex flex-col items-center p-2.5 rounded-xl border border-bordercol bg-slate-900/50 text-slate-400 text-xs font-semibold hover:border-slate-700 transition">
+                        <i class="fa-solid fa-flag-checkered text-base mb-1"></i>
+                        <span>4. Ready?</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-cardbg border border-bordercol rounded-2xl p-6 sm:p-8 shadow-xl flex-1 flex flex-col">
+                
+                <!-- STEP 1: The Idea -->
+                <div id="stepContent1" class="step-content space-y-6">
+                    <div class="border-b border-bordercol pb-4">
+                        <div class="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-1">
+                            <span>Step 1 of 4</span> <i class="fa-solid fa-circle text-[4px]"></i> <span>Foundation</span>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-white">What is your business idea?</h2>
+                        <p class="text-xs text-slate-400 mt-1">Don't worry about sounding professional. Just describe what you want to create in simple words.</p>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>What is your business or project called?</span>
+                                <span class="text-[10px] text-slate-500 font-normal">e.g. CozyBook Cafe</span>
+                            </label>
+                            <input type="text" id="bName" oninput="app.saveData()" placeholder="e.g. Sunny Paws Pet Sitting" class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>What problem does it solve?</span>
+                                <span class="text-[10px] text-indigo-400 font-normal cursor-pointer" onclick="app.showTip('problem')"><i class="fa-solid fa-circle-question"></i> What does this mean?</span>
+                            </label>
+                            <textarea id="bProblem" rows="3" oninput="app.saveData()" placeholder="e.g. Busy dog owners struggle to find trustworthy people to walk their dogs during long work days." class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>What is your solution or product?</span>
+                                <span class="text-[10px] text-indigo-400 font-normal cursor-pointer" onclick="app.showTip('solution')"><i class="fa-solid fa-circle-question"></i> What does this mean?</span>
+                            </label>
+                            <textarea id="bSolution" rows="3" oninput="app.saveData()" placeholder="e.g. A friendly local walking service with live GPS tracking and verified background-checked walkers." class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">What is your main goal in 1 sentence? (Mission)</label>
+                            <input type="text" id="bMission" oninput="app.saveData()" placeholder="e.g. To give pet parents total peace of mind while they are away." class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-4 border-t border-bordercol">
+                        <button onclick="app.setStep(2)" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center gap-2">
+                            Next: Who are your customers? <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Customers & Market -->
+                <div id="stepContent2" class="step-content hidden space-y-6">
+                    <div class="border-b border-bordercol pb-4">
+                        <div class="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-1">
+                            <span>Step 2 of 4</span> <i class="fa-solid fa-circle text-[4px]"></i> <span>Market & Audience</span>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-white">Who will buy from you?</h2>
+                        <p class="text-xs text-slate-400 mt-1">Every great business knows exactly who its customers are.</p>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Who is your ideal customer?</label>
+                            <input type="text" id="bCustomer" oninput="app.saveData()" placeholder="e.g. Working professionals aged 25-45 living in apartments who own dogs." class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+
+                        <div class="bg-slate-900/60 border border-bordercol rounded-xl p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-white flex items-center gap-1.5">
+                                    <i class="fa-solid fa-chart-pie text-indigo-400"></i> How big is the market? (Market Size)
+                                </span>
+                                <span class="text-[10px] text-indigo-400 cursor-pointer" onclick="app.showTip('market')"><i class="fa-solid fa-circle-question"></i> Help me understand</span>
+                            </div>
+                            <p class="text-xs text-slate-400">Roughly how many people might want this in your city or country?</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block mb-1">Total World/Industry (TAM)</span>
+                                    <input type="text" id="bTam" oninput="app.saveData()" placeholder="e.g. $5 Billion" class="w-full bg-slate-950 border border-bordercol rounded-lg px-3 py-2 text-xs text-white">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block mb-1">Your Region (SAM)</span>
+                                    <input type="text" id="bSam" oninput="app.saveData()" placeholder="e.g. $50 Million" class="w-full bg-slate-950 border border-bordercol rounded-lg px-3 py-2 text-xs text-white">
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block mb-1">Your First Goal (SOM)</span>
+                                    <input type="text" id="bSom" oninput="app.saveData()" placeholder="e.g. $500,000" class="w-full bg-slate-950 border border-bordercol rounded-lg px-3 py-2 text-xs text-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                <span>Why is your idea better than existing options? (Your Edge)</span>
+                                <span class="text-[10px] text-indigo-400 cursor-pointer" onclick="app.showTip('edge')"><i class="fa-solid fa-circle-question"></i> What's this?</span>
+                            </label>
+                            <textarea id="bEdge" rows="3" oninput="app.saveData()" placeholder="e.g. Competitors are slow and unreliable. We offer instant booking and photo updates within 5 minutes." class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">How will people find out about you? (Marketing)</label>
+                            <input type="text" id="bMarketing" oninput="app.saveData()" placeholder="e.g. Instagram pet reels, flyers at local dog parks, word of mouth" class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between pt-4 border-t border-bordercol">
+                        <button onclick="app.setStep(1)" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-xl transition flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-left"></i> Back
+                        </button>
+                        <button onclick="app.setStep(3)" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center gap-2">
+                            Next: Money & Finances <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: Money & Projections -->
+                <div id="stepContent3" class="step-content hidden space-y-6">
+                    <div class="border-b border-bordercol pb-4">
+                        <div class="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-1">
+                            <span>Step 3 of 4</span> <i class="fa-solid fa-circle text-[4px]"></i> <span>Revenue & Funding</span>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-white">How will you make money?</h2>
+                        <p class="text-xs text-slate-400 mt-1">Let's figure out pricing, estimated revenue, and if you need funding.</p>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">How do you charge money? (Revenue Model)</label>
+                            <select id="bRevenueModel" onchange="app.saveData()" class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                                <option value="Monthly Subscription (SaaS / Membership)">Monthly Subscription (Pay every month)</option>
+                                <option value="Per-Service Fee / Hourly Rate">Per-Service Fee / Hourly Rate (Pay per job)</option>
+                                <option value="Product Sale / One-time Purchase">Product Sale (Buy it once)</option>
+                                <option value="Marketplace Commission (Taking a cut)">Marketplace Commission (Take a cut of transactions)</option>
+                                <option value="Free with Ads / Premium upgrade">Free with Ads / Premium upgrade</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Starting Money Needed (Startup Cost)</label>
+                                <input type="text" id="bStartCost" oninput="app.saveData()" placeholder="e.g. $5,000" class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Investment Ask (If looking for investors)</label>
+                                <input type="text" id="bFundingAsk" oninput="app.saveData()" placeholder="e.g. $25,000 Angel Round" class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-300 uppercase tracking-wider mb-1">Year 1 Expected Revenue</label>
+                                <input type="text" id="bRev1" oninput="app.saveData()" placeholder="e.g. $30,000" class="w-full bg-slate-900 border border-bordercol rounded-xl px-3 py-2.5 text-xs text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-300 uppercase tracking-wider mb-1">Year 2 Expected Revenue</label>
+                                <input type="text" id="bRev2" oninput="app.saveData()" placeholder="e.g. $90,000" class="w-full bg-slate-900 border border-bordercol rounded-xl px-3 py-2.5 text-xs text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-semibold text-slate-300 uppercase tracking-wider mb-1">Year 3 Expected Revenue</label>
+                                <input type="text" id="bRev3" oninput="app.saveData()" placeholder="e.g. $250,000" class="w-full bg-slate-900 border border-bordercol rounded-xl px-3 py-2.5 text-xs text-white">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">What are your next 3 key milestones?</label>
+                            <textarea id="bMilestones" rows="3" oninput="app.saveData()" placeholder="1. Build simple prototype website&#15;2. Test with 5 local beta users&#15;3. Official public launch" class="w-full bg-slate-900 border border-bordercol rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between pt-4 border-t border-bordercol">
+                        <button onclick="app.setStep(2)" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-xl transition flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-left"></i> Back
+                        </button>
+                        <button onclick="app.setStep(4)" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition flex items-center gap-2">
+                            Next: Review Checklist <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 4: Investor Readiness Checklist -->
+                <div id="stepContent4" class="step-content hidden space-y-6">
+                    <div class="border-b border-bordercol pb-4">
+                        <div class="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-1">
+                            <span>Step 4 of 4</span> <i class="fa-solid fa-circle text-[4px]"></i> <span>Checklist & Ready</span>
+                        </div>
+                        <h2 class="text-xl font-extrabold text-white">Are you ready to share?</h2>
+                        <p class="text-xs text-slate-400 mt-1">Check off items as you complete them to see how ready your business is!</p>
+                    </div>
+
+                    <div class="space-y-3" id="checklistContainer">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-4 flex items-center gap-3">
+                        <i class="fa-solid fa-medal text-indigo-400 text-2xl"></i>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Your One-Page Pitch Sheet is Ready on the Right!</h4>
+                            <p class="text-[11px] text-slate-300">You can print or save your pitch sheet anytime to show advisors, mentors, or investors.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between pt-4 border-t border-bordercol">
+                        <button onclick="app.setStep(3)" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-xl transition flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-left"></i> Back
+                        </button>
+                        <button onclick="app.exportReport()" class="px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white text-sm font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center gap-2">
+                            <i class="fa-solid fa-print"></i> Print / Save Pitch Sheet
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Right Column: Live Beginner One-Page Pitch Sheet (5 cols) -->
+        <div class="lg:col-span-5 flex flex-col space-y-6">
+            
+            <div class="bg-cardbg border border-bordercol rounded-2xl p-6 shadow-xl sticky top-20 flex flex-col max-h-[calc(100vh-6rem)] overflow-y-auto">
+                
+                <div class="flex items-center justify-between pb-4 border-b border-bordercol mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <h3 class="font-bold text-white text-xs tracking-wider uppercase">Your One-Page Pitch Sheet</h3>
+                    </div>
+                    <button onclick="app.exportReport()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> Print
+                    </button>
+                </div>
+
+                <!-- Pitch Sheet Document Container -->
+                <div id="pitchPreview" class="space-y-4 text-slate-300">
+                    
+                    <!-- Header Badge -->
+                    <div class="bg-gradient-to-br from-indigo-950/60 to-slate-900 border border-indigo-500/30 rounded-2xl p-5 text-center">
+                        <span id="prevName" class="text-lg font-extrabold text-white block mb-1">Sunny Paws Pet Sitting</span>
+                        <p id="prevMission" class="text-xs text-indigo-300 italic">"To give pet parents total peace of mind while they are away."</p>
+                    </div>
+
+                    <!-- Problem & Solution Box -->
+                    <div class="bg-slate-900/80 border border-bordercol rounded-xl p-4 space-y-2">
+                        <span class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider block">1. The Problem & Solution</span>
+                        <div>
+                            <span class="text-[10px] text-slate-400 font-semibold block">Problem:</span>
+                            <p id="prevProblem" class="text-xs text-slate-200">Busy dog owners struggle to find trustworthy walkers...</p>
+                        </div>
+                        <div class="pt-2 border-t border-slate-800">
+                            <span class="text-[10px] text-slate-400 font-semibold block">Solution:</span>
+                            <p id="prevSolution" class="text-xs text-slate-200">Verified background-checked walkers with GPS live tracking.</p>
+                        </div>
+                    </div>
+
+                    <!-- Customer & Market Box -->
+                    <div class="bg-slate-900/80 border border-bordercol rounded-xl p-4 space-y-2">
+                        <span class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider block">2. Target Customers & Market</span>
+                        <p id="prevCustomer" class="text-xs text-slate-200">Working professionals aged 25-45 living in apartments.</p>
+                        <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-400 block">World (TAM)</span>
+                                <span id="prevTam" class="text-[11px] font-bold text-white">$5B</span>
+                            </div>
+                            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-400 block">Region (SAM)</span>
+                                <span id="prevSam" class="text-[11px] font-bold text-white">$50M</span>
+                            </div>
+                            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-400 block">Goal (SOM)</span>
+                                <span id="prevSom" class="text-[11px] font-bold text-white">$500K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial & Revenue Model -->
+                    <div class="bg-slate-900/80 border border-bordercol rounded-xl p-4 space-y-2">
+                        <span class="text-[10px] uppercase font-bold text-indigo-400 tracking-wider block">3. Revenue & Funding</span>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-400">Revenue Model:</span>
+                            <span id="prevRevenueModel" class="font-semibold text-emerald-400">Per-Service Fee</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-400 block">Year 1</span>
+                                <span id="prevRev1" class="text-[11px] font-bold text-emerald-400">$30K</span>
+                            </div>
+                            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-400 block">Year 2</span>
+                                <span id="prevRev2" class="text-[11px] font-bold text-emerald-400">$90K</span>
+                            </div>
+                            <div class="bg-slate-950 p-1.5 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-400 block">Year 3</span>
+                                <span id="prevRev3" class="text-[11px] font-bold text-emerald-400">$250K</span>
+                            </div>
+                        </div>
+                        <div class="bg-indigo-950/40 border border-indigo-500/20 p-2.5 rounded-lg flex justify-between items-center mt-2">
+                            <span class="text-[10px] font-semibold text-indigo-300">Funding / Starting Ask:</span>
+                            <span id="prevFundingAsk" class="text-xs font-bold text-white">$25,000 Angel Round</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- AI Mentor Modal -->
+    <div id="aiModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg border border-bordercol rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between border-b border-bordercol pb-3">
+                <h3 class="font-bold text-white text-base flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> AI Idea Helper (Beginner Mode)
+                </h3>
+                <button onclick="app.closeAiModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                Type what you want to do in one plain sentence, and our assistant will instantly fill out your business problem, solution, and customer persona for you!
+            </p>
+            <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Describe your idea in one sentence:</label>
+                <textarea id="aiPromptInput" rows="3" placeholder="e.g. I want to build a mobile app where busy parents can rent out clean baby gear from local neighbors." class="w-full bg-slate-900 border border-bordercol rounded-xl p-3 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="app.closeAiModal()" class="px-4 py-2 bg-slate-800 text-slate-300 text-xs font-semibold rounded-xl">Cancel</button>
+                <button onclick="app.runAiHelper()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30">Generate Plan <i class="fa-solid fa-sparkles ml-1"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Explainer Tooltip Modal -->
+    <div id="tipModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-cardbg border border-bordercol rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-3">
+            <div class="flex items-center justify-between border-b border-bordercol pb-3">
+                <h3 id="tipTitle" class="font-bold text-white text-base flex items-center gap-2 text-indigo-400">Title</h3>
+                <button onclick="app.closeTip()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p id="tipBody" class="text-xs text-slate-300 leading-relaxed">Explanation text...</p>
+            <div class="flex justify-end pt-2">
+                <button onclick="app.closeTip()" class="px-4 py-2 bg-indigo-600 text-white text-xs font-semibold rounded-xl">Got it!</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EXAMPLES = {
+            petSitting: {
+                bName: "Sunny Paws Pet Sitting",
+                bProblem: "Busy dog owners struggle to find trustworthy walkers during long work days.",
+                bSolution: "A friendly local walking service with live GPS tracking and verified background-checked walkers.",
+                bMission: "To give pet parents total peace of mind while they are away.",
+                bCustomer: "Working professionals aged 25-45 living in apartments who own dogs.",
+                bTam: "$5 Billion",
+                bSam: "$50 Million",
+                bSom: "$500,000",
+                bEdge: "Instant booking and live photo updates within 5 minutes compared to old-school agencies.",
+                bMarketing: "Instagram pet reels, flyers at local dog parks, word of mouth",
+                bRevenueModel: "Per-Service Fee / Hourly Rate",
+                bStartCost: "$2,000",
+                bFundingAsk: "$15,000 Angel Round",
+                bRev1: "$35,000",
+                bRev2: "$95,000",
+                bRev3: "$240,000",
+                bMilestones: "1. Create simple booking website\n2. Onboard first 10 local dog walkers\n3. Launch in 3 neighborhoods",
+                checklist: [
+                    { id: 'c1', text: 'Define basic business idea & customer', checked: true },
+                    { id: 'c2', text: 'Set up simple pricing & cost estimate', checked: true },
+                    { id: 'c3', text: 'Create one-page pitch sheet', checked: true },
+                    { id: 'c4', text: 'Talk to 5 potential customers for feedback', checked: false }
+                ]
+            }
+        };
+
+        const EXPLANATIONS = {
+            problem: {
+                title: "What is 'The Problem'?",
+                body: "Think of this as the itch you are scratching. What annoying thing do people deal with every day that your business fixes? For example, people hate waiting in long lines for coffee when running late to work."
+            },
+            solution: {
+                title: "What is 'The Solution'?",
+                body: "This is simply your product or service! How does your business fix the problem you just described? Keep it easy to understand—like explaining it to a friend."
+            },
+            market: {
+                title: "What are TAM, SAM, and SOM? (Market Size)",
+                body: "Don't let these big words scare you!\n\n• TAM (Total World): How much money is spent on this in the entire world.\n• SAM (Your Region): How much is spent in your country or state.\n• SOM (Your Goal): How much money you realistically hope to capture in your first couple of years."
+            },
+            edge: {
+                title: "What is 'Your Edge'?",
+                body: "This is your secret sauce. Why would someone choose YOU instead of an already existing competitor? It could be lower prices, faster delivery, friendlier service, or a unique feature."
+            }
+        };
+
+        class VentureFlowBeginnerApp {
+            constructor() {
+                this.currentStep = 1;
+                this.data = JSON.parse(localStorage.getItem('ventureflow_beginner_data')) || EXAMPLES.petSitting;
+                this.init();
+            }
+
+            init() {
+                this.populateForm();
+                this.renderChecklist();
+                this.updatePreview();
+                this.updateProgress();
+            }
+
+            saveData() {
+                this.data.bName = document.getElementById('bName').value;
+                this.data.bProblem = document.getElementById('bProblem').value;
+                this.data.bSolution = document.getElementById('bSolution').value;
+                this.data.bMission = document.getElementById('bMission').value;
+
+                this.data.bCustomer = document.getElementById('bCustomer').value;
+                this.data.bTam = document.getElementById('bTam').value;
+                this.data.bSam = document.getElementById('bSam').value;
+                this.data.bSom = document.getElementById('bSom').value;
+                this.data.bEdge = document.getElementById('bEdge').value;
+                this.data.bMarketing = document.getElementById('bMarketing').value;
+
+                this.data.bRevenueModel = document.getElementById('bRevenueModel').value;
+                this.data.bStartCost = document.getElementById('bStartCost').value;
+                this.data.bFundingAsk = document.getElementById('bFundingAsk').value;
+                this.data.bRev1 = document.getElementById('bRev1').value;
+                this.data.bRev2 = document.getElementById('bRev2').value;
+                this.data.bRev3 = document.getElementById('bRev3').value;
+                this.data.bMilestones = document.getElementById('bMilestones').value;
+
+                localStorage.setItem('ventureflow_beginner_data', JSON.stringify(this.data));
+                this.updatePreview();
+                this.updateProgress();
+            }
+
+            populateForm() {
+                document.getElementById('bName').value = this.data.bName || '';
+                document.getElementById('bProblem').value = this.data.bProblem || '';
+                document.getElementById('bSolution').value = this.data.bSolution || '';
+                document.getElementById('bMission').value = this.data.bMission || '';
+
+                document.getElementById('bCustomer').value = this.data.bCustomer || '';
+                document.getElementById('bTam').value = this.data.bTam || '';
+                document.getElementById('bSam').value = this.data.bSam || '';
+                document.getElementById('bSom').value = this.data.bSom || '';
+                document.getElementById('bEdge').value = this.data.bEdge || '';
+                document.getElementById('bMarketing').value = this.data.bMarketing || '';
+
+                document.getElementById('bRevenueModel').value = this.data.bRevenueModel || 'Per-Service Fee / Hourly Rate';
+                document.getElementById('bStartCost').value = this.data.bStartCost || '';
+                document.getElementById('bFundingAsk').value = this.data.bFundingAsk || '';
+                document.getElementById('bRev1').value = this.data.bRev1 || '';
+                document.getElementById('bRev2').value = this.data.bRev2 || '';
+                document.getElementById('bRev3').value = this.data.bRev3 || '';
+                document.getElementById('bMilestones').value = this.data.bMilestones || '';
+            }
+
+            setStep(stepNum) {
+                this.currentStep = stepNum;
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById(`stepContent${i}`).classList.add('hidden');
+                    const btn = document.getElementById(`tabBtn${i}`);
+                    btn.classList.remove('border-indigo-500', 'bg-indigo-500/10', 'text-indigo-400');
+                    btn.classList.add('border-bordercol', 'bg-slate-900/50', 'text-slate-400');
+                }
+                document.getElementById(`stepContent${stepNum}`).classList.remove('hidden');
+                const activeBtn = document.getElementById(`tabBtn${stepNum}`);
+                activeBtn.classList.remove('border-bordercol', 'bg-slate-900/50', 'text-slate-400');
+                activeBtn.classList.add('border-indigo-500', 'bg-indigo-500/10', 'text-indigo-400');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            renderChecklist() {
+                const container = document.getElementById('checklistContainer');
+                container.innerHTML = '';
+                if (!this.data.checklist) {
+                    this.data.checklist = EXAMPLES.petSitting.checklist;
+                }
+                this.data.checklist.forEach((item, index) => {
+                    container.innerHTML += `
+                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/60 border border-bordercol hover:border-slate-700 cursor-pointer transition">
+                            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="app.toggleChecklist(${index})" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 bg-slate-800 border-slate-700">
+                            <span class="text-xs font-medium ${item.checked ? 'text-slate-400 line-through' : 'text-white'}">${item.text}</span>
+                        </label>
+                    `;
+                });
+            }
+
+            toggleChecklist(index) {
+                this.data.checklist[index].checked = !this.data.checklist[index].checked;
+                localStorage.setItem('ventureflow_beginner_data', JSON.stringify(this.data));
+                this.renderChecklist();
+                this.updateProgress();
+            }
+
+            updatePreview() {
+                document.getElementById('prevName').innerText = this.data.bName || 'My Business Name';
+                document.getElementById('prevMission').innerText = this.data.bMission ? `"${this.data.bMission}"` : '"Define your mission statement in Step 1."';
+                document.getElementById('prevProblem').innerText = this.data.bProblem || 'Not specified yet.';
+                document.getElementById('prevSolution').innerText = this.data.bSolution || 'Not specified yet.';
+                document.getElementById('prevCustomer').innerText = this.data.bCustomer || 'Not specified yet.';
+                
+                document.getElementById('prevTam').innerText = this.data.bTam || '—';
+                document.getElementById('prevSam').innerText = this.data.bSam || '—';
+                document.getElementById('prevSom').innerText = this.data.bSom || '—';
+                
+                document.getElementById('prevRevenueModel').innerText = this.data.bRevenueModel || '—';
+                document.getElementById('prevRev1').innerText = this.data.bRev1 || '—';
+                document.getElementById('prevRev2').innerText = this.data.bRev2 || '—';
+                document.getElementById('prevRev3').innerText = this.data.bRev3 || '—';
+                document.getElementById('prevFundingAsk').innerText = this.data.bFundingAsk ? this.data.bFundingAsk : 'No funding required yet';
+            }
+
+            updateProgress() {
+                let filled = 0;
+                const total = 10;
+                if (this.data.bName) filled++;
+                if (this.data.bProblem) filled++;
+                if (this.data.bSolution) filled++;
+                if (this.data.bCustomer) filled++;
+                if (this.data.bTam) filled++;
+                if (this.data.bEdge) filled++;
+                if (this.data.bStartCost) filled++;
+                if (this.data.bRev1) filled++;
+                if (this.data.bMilestones) filled++;
+                
+                const checkedCount = (this.data.checklist || []).filter(i => i.checked).length;
+                if (checkedCount >= 2) filled++;
+
+                const percent = Math.min(Math.round((filled / total) * 100), 100);
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('progressText').innerText = percent + '% Done';
+            }
+
+            loadExample() {
+                this.data = JSON.parse(JSON.stringify(EXAMPLES.petSitting));
+                localStorage.setItem('ventureflow_beginner_data', JSON.stringify(this.data));
+                this.populateForm();
+                this.renderChecklist();
+                this.updatePreview();
+                this.updateProgress();
+            }
+
+            resetData() {
+                if (confirm("Are you sure you want to clear your current progress?")) {
+                    localStorage.removeItem('ventureflow_beginner_data');
+                    location.reload();
+                }
+            }
+
+            showTip(key) {
+                const tip = EXPLANATIONS[key];
+                if (!tip) return;
+                document.getElementById('tipTitle').innerText = tip.title;
+                document.getElementById('tipBody').innerText = tip.body;
+                document.getElementById('tipModal').classList.remove('hidden');
+            }
+
+            closeTip() {
+                document.getElementById('tipModal').classList.add('hidden');
+            }
+
+            openAiModal() {
+                document.getElementById('aiModal').classList.remove('hidden');
+            }
+
+            closeAiModal() {
+                document.getElementById('aiModal').classList.add('hidden');
+            }
+
+            runAiHelper() {
+                const prompt = document.getElementById('aiPromptInput').value.trim();
+                if (!prompt) {
+                    alert("Please type a sentence describing your idea first!");
+                    return;
+                }
+                // Smart mock AI filling based on prompt keywords
+                this.data.bName = "SmartShare Rentals";
+                this.data.bProblem = `People need temporary access to items like "${prompt}" without paying full retail price to own them permanently.`;
+                this.data.bSolution = "A peer-to-peer local neighborhood rental platform with secure deposit protection and instant pickup.";
+                this.data.bMission = "To make everyday items accessible and affordable through community sharing.";
+                this.data.bCustomer = "Eco-conscious families and budget-conscious individuals aged 20-40.";
+                this.data.bTam = "$12 Billion";
+                this.data.bSam = "$150 Million";
+                this.data.bSom = "$2 Million";
+                this.data.bEdge = "Lower fees and localized neighborhood pickup points compared to traditional delivery stores.";
+                this.data.bRevenueModel = "Marketplace Commission (Taking a cut)";
+                this.data.bStartCost = "$3,500";
+                this.data.bFundingAsk = "$20,000 Seed";
+                this.data.bRev1 = "$45,000";
+                this.data.bRev2 = "$120,000";
+                this.data.bRev3 = "$350,000";
+                
+                localStorage.setItem('ventureflow_beginner_data', JSON.stringify(this.data));
+                this.populateForm();
+                this.updatePreview();
+                this.updateProgress();
+                this.closeAiModal();
+            }
+
+            exportReport() {
+                window.print();
+            }
+        }
+
+        const app = new VentureFlowBeginnerApp();
+    </script>
+</body>
+</html>
